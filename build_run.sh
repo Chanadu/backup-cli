@@ -6,4 +6,4 @@ echo "Running Project..."
 echo ""
 echo "-------------------"
 echo ""
-./bin/Backup-Cli
+./bin/Backup-Cli "$@"

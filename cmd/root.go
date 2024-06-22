@@ -18,8 +18,10 @@ var rootCmd = &cobra.Command{
 	Long:    `This Cli tool will allow you to connect to a remote server and backup files with ease.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Backup-Cli is a tool to backup files to a remote server.")
+		fmt.Println("Args: ", args)
 	},
 }
 
