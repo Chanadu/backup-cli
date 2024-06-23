@@ -34,5 +34,5 @@ func InitConfig() {
 		os.Exit(1)
 	}
 
-	fmt.Println("test123: ", viper.Get("test123"))
+	// fmt.Println("test123: ", viper.Get("test123"))
 }

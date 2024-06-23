@@ -19,15 +19,22 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 
-	//Args: cobra.MinimumNArgs(1),
+	Args: cobra.MinimumNArgs(3),
 
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Backup-Cli is a tool to backup files to a remote server.")
-		fmt.Println("Args: ", args)
 		fmt.Println("")
 		fmt.Println("--------------------")
 		fmt.Println("")
-		fmt.Println("cfgFile: ", cfgFile)
+		//`
+		// sshpass -p pi ssh pi@RaspberryPi StrictHostKeyChecking=no 'rm ~/*.7z; rm ~/backup.sh; exit'
+		// a Folders-Backup.7z Folders
+		// 7z a config.7z .config
+		// sshpass -p pi scp Folders-Backup.7z pi@RaspberryPi:~/Folders-Backup.7z
+		// sshpass -p pi scp config.7z pi@RaspberryPi:~/config.7z
+		// sshpass -p pi scp backup.sh pi@RaspberryPi:~/backup.sh
+		// `
+		BackupFiles(args)
 	},
 }
 
