@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+
+	"github.com/spf13/cobra"
 )
 
-func BackupFiles(args []string) {
+func BackupFiles(cmd *cobra.Command, args []string) {
 
 	if err := exec.Command(
 		"bash",
@@ -24,18 +26,25 @@ func BackupFiles(args []string) {
 	//			deleteServerBackupsCmd,
 	//		)
 
-	createBackupFiles(args)
-	fmt.Printf("\n---------------------------------------\n")
-	deleteServerBackupFiles(args)
-	fmt.Printf("\n---------------------------------------\n")
-	scpBackupFiles(args)
-	fmt.Printf("\n---------------------------------------\n")
-	deleteLocalBackupFiles(args)
-	fmt.Printf("\n---------------------------------------\n")
+	isDebug, err := cmd.Flags().GetBool("debug")
+	if err != nil {
+		fmt.Printf("Error getting debug flag: %s\n", err)
+		os.Exit(1)
+	}
+
+	createBackupFiles(args, isDebug)
+	fmt.Printf("\n---------------------------------------\n\n")
+	deleteServerBackupFiles(args, isDebug)
+	fmt.Printf("\n---------------------------------------\n\n")
+	scpBackupFiles(args, isDebug)
+	fmt.Printf("\n---------------------------------------\n\n")
+	deleteLocalBackupFiles(args, isDebug)
+	fmt.Printf("\n---------------------------------------\n\n")
 	fmt.Println("Backup completed successfully.")
 }
 
-func createBackupFiles(args []string) {
+func createBackupFiles(args []string, isDebug bool) {
+
 	createCmdText := ""
 	for i := 2; i < len(args); i++ {
 		createCmdText = createCmdText + fmt.Sprintf(
@@ -54,11 +63,13 @@ func createBackupFiles(args []string) {
 		fmt.Printf("Error creating backup files: %s\n", err)
 		os.Exit(1)
 	}
-	fmt.Printf("Command Ran: %s\n", createCmd.String())
+	if isDebug {
+		fmt.Printf("Command Ran: %s\n", createCmdText)
+	}
 	fmt.Printf("Backup files created: %s\n", osOut.String())
 }
 
-func scpBackupFiles(args []string) {
+func scpBackupFiles(args []string, isDebug bool) {
 	scpCmdText := ""
 	for i := 2; i < len(args); i++ {
 
@@ -78,11 +89,13 @@ func scpBackupFiles(args []string) {
 		fmt.Printf("Error copying backup files to server: %s\n", err)
 		os.Exit(1)
 	}
-	fmt.Printf("Command Ran: %s\n", scpCmd.String())
-	fmt.Println("Backup files copied to server: ", osOut.String())
+	if isDebug {
+		fmt.Printf("Command Ran: %s\n", scpCmdText)
+	}
+	fmt.Println("Backup files copied to server. ", osOut.String())
 }
 
-func deleteServerBackupFiles(args []string) {
+func deleteServerBackupFiles(args []string, isDebug bool) {
 	deleteServerCmdText := ""
 	for i := 2; i < len(args); i++ {
 		deleteServerCmdText = deleteServerCmdText + fmt.Sprintf(
@@ -107,20 +120,29 @@ func deleteServerBackupFiles(args []string) {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Command Ran: %s\n", deleteServerCmdText)
+	if isDebug {
+		fmt.Printf("Command Ran: %s\n", deleteServerCmdText)
+	}
 	fmt.Printf("Old server backup files deleted: %s\n", osOut.String())
 }
 
-func deleteLocalBackupFiles(args []string) {
-	deleteCmd := ""
+func deleteLocalBackupFiles(args []string, isDebug bool) {
+	deleteCmdText := ""
 	for i := 2; i < len(args); i++ {
-		deleteCmd = deleteCmd + fmt.Sprintf("rm %s-Backup.7z; ", args[i])
+		deleteCmdText = deleteCmdText + fmt.Sprintf("rm %s-Backup.7z; ", args[i])
 	}
 
-	if err := exec.Command("bash", "-c", deleteCmd).Run(); err != nil {
+	var osOut bytes.Buffer
+	deleteCmd := exec.Command("bash", "-c", deleteCmdText)
+	deleteCmd.Stdout = &osOut
+
+	if err := exec.Command("bash", "-c", deleteCmdText).Run(); err != nil {
 		fmt.Printf("Error deleting local backup files: %s\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Println("Local backup files deleted: ", deleteCmd)
+	if isDebug {
+		fmt.Printf("Command Ran: %s\n", deleteCmdText)
+	}
+	fmt.Println("Local backup files deleted. ", osOut.String())
 }
