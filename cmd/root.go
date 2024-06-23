@@ -18,12 +18,20 @@ var rootCmd = &cobra.Command{
 	Long:    `This Cli tool will allow you to connect to a remote server and backup files with ease.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	Args: cobra.MinimumNArgs(1),
+
+	//Args: cobra.MinimumNArgs(1),
+
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Backup-Cli is a tool to backup files to a remote server.")
 		fmt.Println("Args: ", args)
+		fmt.Println("")
+		fmt.Println("--------------------")
+		fmt.Println("")
+		fmt.Println("cfgFile: ", cfgFile)
 	},
 }
+
+var cfgFile string
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -34,14 +42,21 @@ func Execute() {
 	}
 }
 
+type conf struct {
+	testValue string
+}
+
 func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.Backup-Cli.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/Backup-Cli/Backup-Cli.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	cobra.OnInitialize(InitConfig)
+
 }
