@@ -44,35 +44,31 @@ func BackupFiles(cmd *cobra.Command, args []string) {
 }
 
 func createBackupFiles(args []string, isDebug bool) {
-
-	createCmdText := ""
 	for i := 2; i < len(args); i++ {
-		createCmdText = createCmdText + fmt.Sprintf(
-			"7z a %s.7z; mv %s.7z %s-Backup.7z; ",
-			args[i],
+		createCmdText := fmt.Sprintf(
+			"7z a-m0=lzma2 -mx=9 %s-Backup.7z %s",
 			args[i],
 			args[i],
 		)
+		var osOut bytes.Buffer
+		createCmd := exec.Command("bash", "-c", createCmdText)
+		createCmd.Stdout = &osOut
+
+		if err := createCmd.Run(); err != nil {
+			fmt.Printf("Error creating backup file (%s): %s\n", args[i], err)
+			os.Exit(1)
+		}
+		if isDebug {
+			fmt.Printf("Command Ran: %s\n", createCmdText)
+		}
+		fmt.Printf("Backup file created(%s): %s\n", args[i], osOut.String())
 	}
 
-	var osOut bytes.Buffer
-	createCmd := exec.Command("bash", "-c", createCmdText)
-	createCmd.Stdout = &osOut
-
-	if err := createCmd.Run(); err != nil {
-		fmt.Printf("Error creating backup files: %s\n", err)
-		os.Exit(1)
-	}
-	if isDebug {
-		fmt.Printf("Command Ran: %s\n", createCmdText)
-	}
-	fmt.Printf("Backup files created: %s\n", osOut.String())
 }
 
 func scpBackupFiles(args []string, isDebug bool) {
 	scpCmdText := ""
 	for i := 2; i < len(args); i++ {
-
 		scpCmdText = scpCmdText + fmt.Sprintf(
 			"sshpass -p %s scp %s-Backup.7z %s:~/backups/%s-Backup.7z; ",
 			args[1],
@@ -85,12 +81,13 @@ func scpBackupFiles(args []string, isDebug bool) {
 	scpCmd := exec.Command("bash", "-c", scpCmdText)
 	scpCmd.Stdout = &osOut
 
+	if isDebug {
+		fmt.Printf("Command Ran: %s\n", scpCmdText)
+	}
+
 	if err := exec.Command("bash", "-c", scpCmdText).Run(); err != nil {
 		fmt.Printf("Error copying backup files to server: %s\n", err)
 		os.Exit(1)
-	}
-	if isDebug {
-		fmt.Printf("Command Ran: %s\n", scpCmdText)
 	}
 	fmt.Println("Backup files copied to server. ", osOut.String())
 }
@@ -115,14 +112,15 @@ func deleteServerBackupFiles(args []string, isDebug bool) {
 	)
 	deleteServerCmd.Stdout = &osOut
 
+	if isDebug {
+		fmt.Printf("Command Ran: %s\n", deleteServerCmdText)
+	}
+
 	if err := deleteServerCmd.Run(); err != nil {
 		fmt.Printf("Error deleting old server backup files: %s\n", err)
 		os.Exit(1)
 	}
 
-	if isDebug {
-		fmt.Printf("Command Ran: %s\n", deleteServerCmdText)
-	}
 	fmt.Printf("Old server backup files deleted: %s\n", osOut.String())
 }
 
@@ -136,13 +134,13 @@ func deleteLocalBackupFiles(args []string, isDebug bool) {
 	deleteCmd := exec.Command("bash", "-c", deleteCmdText)
 	deleteCmd.Stdout = &osOut
 
+	if isDebug {
+		fmt.Printf("Command Ran: %s\n", deleteCmdText)
+	}
 	if err := exec.Command("bash", "-c", deleteCmdText).Run(); err != nil {
 		fmt.Printf("Error deleting local backup files: %s\n", err)
 		os.Exit(1)
 	}
 
-	if isDebug {
-		fmt.Printf("Command Ran: %s\n", deleteCmdText)
-	}
 	fmt.Println("Local backup files deleted. ", osOut.String())
 }

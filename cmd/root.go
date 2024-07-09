@@ -24,7 +24,19 @@ var rootCmd = &cobra.Command{
 		fmt.Println("")
 		fmt.Println("--------------------")
 		fmt.Println("")
+		workingDir, err := os.Getwd()
+		if err != nil {
+			fmt.Printf("Error getting current working directory: %s\n", err)
+			os.Exit(1)
+		}
 
+		for i := 2; i < len(args); i++ {
+			if _, err := os.Stat(workingDir + "/" + args[i]); err != nil {
+				fmt.Printf("Error: File %s does not exist in the current working directory\n", args[i])
+				fmt.Printf("File is not at: %s\n", workingDir+args[i])
+				os.Exit(1)
+			}
+		}
 		BackupFiles(cmd, args)
 	},
 }
