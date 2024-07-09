@@ -26,11 +26,17 @@ func BackupFiles(cmd *cobra.Command, args []string) {
 	//			deleteServerBackupsCmd,
 	//		)
 
-	isDebug, err := cmd.Flags().GetBool("debug")
+	debugFlag, err := cmd.Flags().GetBool("debug")
 	if err != nil {
 		fmt.Printf("Error getting debug flag: %s\n", err)
 		os.Exit(1)
 	}
+	verboseFlag, err := cmd.Flags().GetBool("verbose")
+	if err != nil {
+		fmt.Printf("Error getting verbose flag: %s\n", err)
+		os.Exit(1)
+	}
+	isDebug := debugFlag || verboseFlag
 
 	createBackupFiles(args, isDebug)
 	fmt.Printf("\n---------------------------------------\n\n")

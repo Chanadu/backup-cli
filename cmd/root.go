@@ -51,8 +51,14 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolP("debug", "d", false, "debug mode(includes messages of ran commands)")
+	rootCmd.PersistentFlags().BoolP("debug", "d", false, "DEPRECIATED: USE -v or --verbose, debug mode(includes messages of ran commands)")
 
+	err := rootCmd.PersistentFlags().MarkDeprecated("debug", "Use -v or --verbose instead")
+	if err != nil {
+		fmt.Printf("Error marking debug flag as depreciated: %s\n", err)
+		os.Exit(1)
+	}
+
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose mode(includes messages of ran commands)")
 	// cobra.OnInitialize(InitConfig)
-
 }
