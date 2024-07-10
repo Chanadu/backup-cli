@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"bytes"
+	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 
@@ -19,12 +20,6 @@ func BackupFiles(cmd *cobra.Command, args []string) {
 		fmt.Printf("Error connecting to server: %s\n", err)
 		os.Exit(1)
 	}
-
-	//		fmt.Printf("sshpass -p %s ssh %s StrictHostKeyChecking=no '%sexit'",
-	//			args[1],
-	//			args[0],
-	//			deleteServerBackupsCmd,
-	//		)
 
 	debugFlag, err := cmd.Flags().GetBool("debug")
 	if err != nil {
@@ -46,7 +41,7 @@ func BackupFiles(cmd *cobra.Command, args []string) {
 	fmt.Printf("\n---------------------------------------\n\n")
 	deleteLocalBackupFiles(args, isDebug)
 	fmt.Printf("\n---------------------------------------\n\n")
-	fmt.Println("Backup completed successfully.")
+	_, _ = fmt.Println("Backup completed successfully.")
 }
 
 func createBackupFiles(args []string, isDebug bool) {
@@ -56,18 +51,19 @@ func createBackupFiles(args []string, isDebug bool) {
 			args[i],
 			args[i],
 		)
-		var osOut bytes.Buffer
-		createCmd := exec.Command("bash", "-c", createCmdText)
-		createCmd.Stdout = &osOut
 
-		if err := createCmd.Run(); err != nil {
+		if isDebug {
+			fmt.Printf("Command Running: %s\n", createCmdText)
+		}
+
+		err := runCommand(createCmdText)
+
+		if err != nil {
 			fmt.Printf("Error creating backup file (%s): %s\n", args[i], err)
 			os.Exit(1)
 		}
-		if isDebug {
-			fmt.Printf("Command Ran: %s\n", createCmdText)
-		}
-		fmt.Printf("Backup file created(%s): %s\n", args[i], osOut.String())
+
+		fmt.Printf("Backup file created: (%s)\n", args[i])
 	}
 
 }
@@ -83,19 +79,18 @@ func scpBackupFiles(args []string, isDebug bool) {
 			args[i],
 		)
 	}
-	var osOut bytes.Buffer
-	scpCmd := exec.Command("bash", "-c", scpCmdText)
-	scpCmd.Stdout = &osOut
 
 	if isDebug {
-		fmt.Printf("Command Ran: %s\n", scpCmdText)
+		fmt.Printf("Command Running: %s\n", scpCmdText)
 	}
 
-	if err := exec.Command("bash", "-c", scpCmdText).Run(); err != nil {
+	err := runCommand(scpCmdText)
+	if err != nil {
 		fmt.Printf("Error copying backup files to server: %s\n", err)
 		os.Exit(1)
 	}
-	fmt.Println("Backup files copied to server. ", osOut.String())
+
+	_, _ = fmt.Println("Backup files copied to server.")
 }
 
 func deleteServerBackupFiles(args []string, isDebug bool) {
@@ -111,23 +106,19 @@ func deleteServerBackupFiles(args []string, isDebug bool) {
 		args[0],
 		deleteServerCmdText,
 	)
-	var osOut bytes.Buffer
-	deleteServerCmd := exec.Command("bash",
-		"-c",
-		deleteServerCmdText,
-	)
-	deleteServerCmd.Stdout = &osOut
 
 	if isDebug {
-		fmt.Printf("Command Ran: %s\n", deleteServerCmdText)
+		fmt.Printf("Command Running: %s\n", deleteServerCmdText)
 	}
 
-	if err := deleteServerCmd.Run(); err != nil {
+	err := runCommand(deleteServerCmdText)
+
+	if err != nil {
 		fmt.Printf("Error deleting old server backup files: %s\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("Old server backup files deleted: %s\n", osOut.String())
+	_, _ = fmt.Println("Old server backup files deleted.")
 }
 
 func deleteLocalBackupFiles(args []string, isDebug bool) {
@@ -136,17 +127,45 @@ func deleteLocalBackupFiles(args []string, isDebug bool) {
 		deleteCmdText = deleteCmdText + fmt.Sprintf("rm %s-Backup.7z; ", args[i])
 	}
 
-	var osOut bytes.Buffer
-	deleteCmd := exec.Command("bash", "-c", deleteCmdText)
-	deleteCmd.Stdout = &osOut
-
 	if isDebug {
-		fmt.Printf("Command Ran: %s\n", deleteCmdText)
+		fmt.Printf("Command Running: %s\n", deleteCmdText)
 	}
-	if err := exec.Command("bash", "-c", deleteCmdText).Run(); err != nil {
+
+	err := runCommand(deleteCmdText)
+
+	if err != nil {
 		fmt.Printf("Error deleting local backup files: %s\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Println("Local backup files deleted. ", osOut.String())
+	_, _ = fmt.Println("Local backup files deleted. ")
+}
+
+func runCommand(cmdText string) error {
+	cmd := exec.Command("bash", "-c", cmdText)
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(io.MultiReader(stdout, stderr))
+	fmt.Println("Here")
+	for scanner.Scan() {
+		fmt.Println("For Loop Running")
+		m := scanner.Text()
+		_, _ = fmt.Println(m)
+	}
+	err = cmd.Wait()
+	return err
 }
