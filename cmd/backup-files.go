@@ -160,9 +160,9 @@ func runCommand(cmdText string) error {
 	}
 
 	scanner := bufio.NewScanner(io.MultiReader(stdout, stderr))
-	fmt.Println("Here")
+	// fmt.Println("Here")
 	for scanner.Scan() {
-		fmt.Println("For Loop Running")
+		// fmt.Println("For Loop Running")
 		m := scanner.Text()
 		_, _ = fmt.Println(m)
 	}
