@@ -52,7 +52,7 @@ func BackupFiles(cmd *cobra.Command, args []string) {
 func createBackupFiles(args []string, isDebug bool) {
 	for i := 2; i < len(args); i++ {
 		createCmdText := fmt.Sprintf(
-			"7z a-m0=lzma2 -mx=9 %s-Backup.7z %s",
+			"7z a -m0=lzma2 -mx=9 %s-Backup.7z %s",
 			args[i],
 			args[i],
 		)
