@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 
@@ -144,28 +142,13 @@ func deleteLocalBackupFiles(args []string, isDebug bool) {
 func runCommand(cmdText string) error {
 	cmd := exec.Command("bash", "-c", cmdText)
 
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Start(); err != nil {
 		return err
 	}
 
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-
-	err = cmd.Start()
-	if err != nil {
-		return err
-	}
-
-	scanner := bufio.NewScanner(io.MultiReader(stdout, stderr))
-	// fmt.Println("Here")
-	for scanner.Scan() {
-		// fmt.Println("For Loop Running")
-		m := scanner.Text()
-		_, _ = fmt.Println(m)
-	}
-	err = cmd.Wait()
+	err := cmd.Wait()
 	return err
 }
