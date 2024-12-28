@@ -26,14 +26,14 @@ var rootCmd = &cobra.Command{
 		_, _ = fmt.Println("")
 		workingDir, err := os.Getwd()
 		if err != nil {
-			fmt.Printf("Error getting current working directory: %s\n", err)
+			printErrorf("Error getting current working directory: %s\n", err)
 			os.Exit(1)
 		}
 
 		for i := 2; i < len(args); i++ {
 			if _, err := os.Stat(workingDir + "/" + args[i]); err != nil {
-				fmt.Printf("Error: File %s does not exist in the current working directory\n", args[i])
-				fmt.Printf("File is not at: %s\n", workingDir+args[i])
+				printErrorf("Error: File %s does not exist in the current working directory\n", args[i])
+				printErrorf("File is not at: %s\n", workingDir+args[i])
 				os.Exit(1)
 			}
 		}
@@ -55,7 +55,7 @@ func init() {
 
 	err := rootCmd.PersistentFlags().MarkDeprecated("debug", "Use -v or --verbose instead")
 	if err != nil {
-		fmt.Printf("Error marking debug flag as depreciated: %s\n", err)
+		printErrorf("Error marking debug flag as depreciated: %s\n", err)
 		os.Exit(1)
 	}
 

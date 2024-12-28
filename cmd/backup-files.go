@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -15,18 +16,18 @@ func BackupFiles(cmd *cobra.Command, args []string) {
 		"-c",
 		"sshpass -p "+args[1]+" ssh "+args[0]+" StrictHostKeyChecking=no 'echo 1; exit'",
 	).Run(); err != nil {
-		fmt.Printf("Error connecting to server: %s\n", err)
+		printErrorf("Error connecting to server: %s\n", err)
 		os.Exit(1)
 	}
 
 	debugFlag, err := cmd.Flags().GetBool("debug")
 	if err != nil {
-		fmt.Printf("Error getting debug flag: %s\n", err)
+		printErrorf("Error getting debug flag: %s\n", err)
 		os.Exit(1)
 	}
 	verboseFlag, err := cmd.Flags().GetBool("verbose")
 	if err != nil {
-		fmt.Printf("Error getting verbose flag: %s\n", err)
+		printErrorf("Error getting verbose flag: %s\n", err)
 		os.Exit(1)
 	}
 	isDebug := debugFlag || verboseFlag
@@ -57,7 +58,7 @@ func createBackupFiles(args []string, isDebug bool) {
 		err := runCommand(createCmdText)
 
 		if err != nil {
-			fmt.Printf("Error creating backup file (%s): %s\n", args[i], err)
+			printErrorf("Error creating backup file (%s): %s\n", args[i], err)
 			os.Exit(1)
 		}
 
@@ -84,7 +85,7 @@ func scpBackupFiles(args []string, isDebug bool) {
 
 	err := runCommand(scpCmdText)
 	if err != nil {
-		fmt.Printf("Error copying backup files to server: %s\n", err)
+		printErrorf("Error copying backup files to server: %s\n", err)
 		os.Exit(1)
 	}
 
@@ -112,7 +113,7 @@ func deleteServerBackupFiles(args []string, isDebug bool) {
 	err := runCommand(deleteServerCmdText)
 
 	if err != nil {
-		fmt.Printf("Error deleting old server backup files: %s\n", err)
+		printErrorf("Error deleting old server backup files: %s\n", err)
 		os.Exit(1)
 	}
 
@@ -132,7 +133,7 @@ func deleteLocalBackupFiles(args []string, isDebug bool) {
 	err := runCommand(deleteCmdText)
 
 	if err != nil {
-		fmt.Printf("Error deleting local backup files: %s\n", err)
+		printErrorf("Error deleting local backup files: %s\n", err)
 		os.Exit(1)
 	}
 
@@ -151,4 +152,12 @@ func runCommand(cmdText string) error {
 
 	err := cmd.Wait()
 	return err
+}
+
+func printErrorf(format string, args ...interface{}) {
+	_, err := color.New(color.FgRed, color.Bold).Printf(format, args...)
+	if err != nil {
+		_, _ = fmt.Printf("Error printing colored error: %s\n", err)
+		_, _ = fmt.Printf("Original error was: %s\n", fmt.Sprintf(format, args...))
+	}
 }
