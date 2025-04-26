@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -45,9 +46,10 @@ func BackupFiles(cmd *cobra.Command, args []string) {
 
 func createBackupFiles(args []string, isDebug bool) {
 	for i := 2; i < len(args); i++ {
+
 		createCmdText := fmt.Sprintf(
 			"7z a -mx=9 %s-Backup.7z %s",
-			args[i],
+			strings.TrimLeft(args[i], "."),
 			args[i],
 		)
 
@@ -73,9 +75,9 @@ func scpBackupFiles(args []string, isDebug bool) {
 		scpCmdText = scpCmdText + fmt.Sprintf(
 			"sshpass -p %s scp %s-Backup.7z %s:~/backups/%s-Backup.7z; ",
 			args[1],
-			args[i],
+			strings.TrimLeft(args[i], "."),
 			args[0],
-			args[i],
+			strings.TrimLeft(args[i], "."),
 		)
 	}
 
@@ -97,7 +99,7 @@ func deleteServerBackupFiles(args []string, isDebug bool) {
 	for i := 2; i < len(args); i++ {
 		deleteServerCmdText = deleteServerCmdText + fmt.Sprintf(
 			"rm ~/backups/%s-Backup.7z -f; ",
-			args[i],
+			strings.TrimLeft(args[i], "."),
 		)
 	}
 	deleteServerCmdText = fmt.Sprintf("sshpass -p %s ssh %s StrictHostKeyChecking=no '%s exit'",
@@ -123,7 +125,9 @@ func deleteServerBackupFiles(args []string, isDebug bool) {
 func deleteLocalBackupFiles(args []string, isDebug bool) {
 	deleteCmdText := ""
 	for i := 2; i < len(args); i++ {
-		deleteCmdText = deleteCmdText + fmt.Sprintf("rm %s-Backup.7z; ", args[i])
+		deleteCmdText = deleteCmdText + fmt.Sprintf("rm %s-Backup.7z; ",
+			strings.TrimLeft(args[i], "."),
+		)
 	}
 
 	if isDebug {
@@ -154,7 +158,7 @@ func runCommand(cmdText string) error {
 	return err
 }
 
-func printErrorf(format string, args ...interface{}) {
+func printErrorf(format string, args ...any) {
 	_, err := color.New(color.FgRed, color.Bold).Printf(format, args...)
 	if err != nil {
 		_, _ = fmt.Printf("Error printing colored error: %s\n", err)
