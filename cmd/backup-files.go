@@ -57,12 +57,13 @@ func createBackupFiles(args []string, isDebug bool) {
 			fmt.Printf("Command Running: %s\n", createCmdText)
 		}
 
-		err := runCommand(createCmdText)
-
-		if err != nil {
-			printErrorf("Error creating backup file (%s): %s\n", args[i], err)
-			os.Exit(1)
-		}
+		_ = runCommand(createCmdText)
+		//
+		// if exiterr, ok := err.(*exec.ExitError); ok {
+		// 	printErrorf("Error creating backup file (%s): %s\n", args[i], exiterr)
+		// 	deleteLocalBackupFiles(args, isDebug)
+		// 	os.Exit(1)
+		// }
 
 		fmt.Printf("Backup file created: (%s)\n", args[i])
 	}
@@ -88,6 +89,7 @@ func scpBackupFiles(args []string, isDebug bool) {
 	err := runCommand(scpCmdText)
 	if err != nil {
 		printErrorf("Error copying backup files to server: %s\n", err)
+		deleteLocalBackupFiles(args, isDebug)
 		os.Exit(1)
 	}
 
@@ -116,6 +118,7 @@ func deleteServerBackupFiles(args []string, isDebug bool) {
 
 	if err != nil {
 		printErrorf("Error deleting old server backup files: %s\n", err)
+		deleteLocalBackupFiles(args, isDebug)
 		os.Exit(1)
 	}
 
