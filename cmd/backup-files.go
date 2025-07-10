@@ -46,7 +46,6 @@ func BackupFiles(cmd *cobra.Command, args []string) {
 
 func createBackupFiles(args []string, isDebug bool) {
 	for i := 2; i < len(args); i++ {
-
 		createCmdText := fmt.Sprintf(
 			"7z a -mx=9 %s-Backup.7z %s",
 			strings.TrimLeft(args[i], "."),
@@ -58,12 +57,6 @@ func createBackupFiles(args []string, isDebug bool) {
 		}
 
 		_ = runCommand(createCmdText)
-		//
-		// if exiterr, ok := err.(*exec.ExitError); ok {
-		// 	printErrorf("Error creating backup file (%s): %s\n", args[i], exiterr)
-		// 	deleteLocalBackupFiles(args, isDebug)
-		// 	os.Exit(1)
-		// }
 
 		fmt.Printf("Backup file created: (%s)\n", args[i])
 	}
@@ -71,26 +64,24 @@ func createBackupFiles(args []string, isDebug bool) {
 }
 
 func scpBackupFiles(args []string, isDebug bool) {
-	scpCmdText := ""
 	for i := 2; i < len(args); i++ {
-		scpCmdText = scpCmdText + fmt.Sprintf(
-			"sshpass -p %s scp %s-Backup.7z %s:~/backups/%s-Backup.7z; ",
+		scpCmdText := fmt.Sprintf(
+			"sshpass -p %s rsync %s-Backup.7z %s:/mnt/backups/%s-Backup.7z",
 			args[1],
 			strings.TrimLeft(args[i], "."),
 			args[0],
 			strings.TrimLeft(args[i], "."),
 		)
-	}
 
-	if isDebug {
-		fmt.Printf("Command Running: %s\n", scpCmdText)
-	}
-
-	err := runCommand(scpCmdText)
-	if err != nil {
-		printErrorf("Error copying backup files to server: %s\n", err)
-		deleteLocalBackupFiles(args, isDebug)
-		os.Exit(1)
+		if isDebug {
+			fmt.Printf("Command Running: %s\n", scpCmdText)
+		}
+		err := runCommand(scpCmdText)
+		if err != nil {
+			printErrorf("Error copying backup files to server: %s\n", err)
+			deleteLocalBackupFiles(args, isDebug)
+			os.Exit(1)
+		}
 	}
 
 	_, _ = fmt.Println("Backup files copied to server.")
@@ -100,7 +91,7 @@ func deleteServerBackupFiles(args []string, isDebug bool) {
 	deleteServerCmdText := ""
 	for i := 2; i < len(args); i++ {
 		deleteServerCmdText = deleteServerCmdText + fmt.Sprintf(
-			"rm ~/backups/%s-Backup.7z -f; ",
+			"rm /mnt/backups/%s-Backup.7z -f; ",
 			strings.TrimLeft(args[i], "."),
 		)
 	}

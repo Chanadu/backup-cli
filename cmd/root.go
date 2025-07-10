@@ -1,5 +1,5 @@
 /*
-Copyright © 2024 Chandu Peddada chandu.peddada@gmail.com
+Copyright © 2025 Chandu Peddada chandu.peddada@gmail.com
 */
 package cmd
 
@@ -20,7 +20,7 @@ var rootCmd = &cobra.Command{
 	Args: cobra.MinimumNArgs(3),
 
 	Run: func(cmd *cobra.Command, args []string) {
-		_, _ = fmt.Println("Backup-Cli is a tool to backup files to a remote server.")
+		_, _ = fmt.Println("Backup-Cli is a tool to backup files to a remote server. (1.1)")
 		_, _ = fmt.Println("")
 		_, _ = fmt.Println("--------------------")
 		_, _ = fmt.Println("")
