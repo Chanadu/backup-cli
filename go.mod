@@ -1,4 +1,4 @@
-module Backup-Cli
+module backup-cli
 
 go 1.22.4
 

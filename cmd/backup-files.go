@@ -10,6 +10,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func modifyFileName(str string) string {
+	str = strings.TrimLeft(str, ".")
+	str = strings.TrimRight(str, "/")
+	return str
+}
+
 func BackupFiles(cmd *cobra.Command, args []string) {
 
 	if err := exec.Command(
@@ -35,8 +41,8 @@ func BackupFiles(cmd *cobra.Command, args []string) {
 
 	createBackupFiles(args, isDebug)
 	fmt.Printf("\n---------------------------------------\n\n")
-	deleteServerBackupFiles(args, isDebug)
-	fmt.Printf("\n---------------------------------------\n\n")
+	// deleteServerBackupFiles(args, isDebug)
+	// fmt.Printf("\n---------------------------------------\n\n")
 	scpBackupFiles(args, isDebug)
 	fmt.Printf("\n---------------------------------------\n\n")
 	deleteLocalBackupFiles(args, isDebug)
@@ -48,7 +54,7 @@ func createBackupFiles(args []string, isDebug bool) {
 	for i := 2; i < len(args); i++ {
 		createCmdText := fmt.Sprintf(
 			"7z a -mx=9 %s-Backup.7z %s",
-			strings.TrimLeft(args[i], "."),
+			modifyFileName(args[i]),
 			args[i],
 		)
 
@@ -68,9 +74,9 @@ func scpBackupFiles(args []string, isDebug bool) {
 		scpCmdText := fmt.Sprintf(
 			"sshpass -p %s rsync %s-Backup.7z %s:/mnt/backups/%s-Backup.7z",
 			args[1],
-			strings.TrimLeft(args[i], "."),
+			modifyFileName(args[i]),
 			args[0],
-			strings.TrimLeft(args[i], "."),
+			modifyFileName(args[i]),
 		)
 
 		if isDebug {
@@ -92,7 +98,7 @@ func deleteServerBackupFiles(args []string, isDebug bool) {
 	for i := 2; i < len(args); i++ {
 		deleteServerCmdText = deleteServerCmdText + fmt.Sprintf(
 			"rm /mnt/backups/%s-Backup.7z -f; ",
-			strings.TrimLeft(args[i], "."),
+			modifyFileName(args[i]),
 		)
 	}
 	deleteServerCmdText = fmt.Sprintf("sshpass -p %s ssh %s StrictHostKeyChecking=no '%s exit'",
@@ -120,7 +126,7 @@ func deleteLocalBackupFiles(args []string, isDebug bool) {
 	deleteCmdText := ""
 	for i := 2; i < len(args); i++ {
 		deleteCmdText = deleteCmdText + fmt.Sprintf("rm %s-Backup.7z; ",
-			strings.TrimLeft(args[i], "."),
+			modifyFileName(args[i]),
 		)
 	}
 
