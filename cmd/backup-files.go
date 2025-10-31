@@ -41,8 +41,8 @@ func BackupFiles(cmd *cobra.Command, args []string) {
 
 	createBackupFiles(args, isDebug)
 	fmt.Printf("\n---------------------------------------\n\n")
-	// deleteServerBackupFiles(args, isDebug)
-	// fmt.Printf("\n---------------------------------------\n\n")
+	deleteServerBackupFiles(args, isDebug)
+	fmt.Printf("\n---------------------------------------\n\n")
 	scpBackupFiles(args, isDebug)
 	fmt.Printf("\n---------------------------------------\n\n")
 	deleteLocalBackupFiles(args, isDebug)
@@ -63,6 +63,11 @@ func createBackupFiles(args []string, isDebug bool) {
 		}
 
 		_ = runCommand(createCmdText)
+		// if err != nil {
+		// 	printErrorf("Error creating archive file: %s\n", err)
+		// 	deleteLocalBackupFiles(args, isDebug)
+		// 	os.Exit(1)
+		// }
 
 		fmt.Printf("Backup file created: (%s)\n", args[i])
 	}
