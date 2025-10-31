@@ -20,7 +20,7 @@ var rootCmd = &cobra.Command{
 	Args: cobra.MinimumNArgs(3),
 
 	Run: func(cmd *cobra.Command, args []string) {
-		_, _ = fmt.Println("backup-cli is a tool to backup files to a remote server. (1.1)")
+		_, _ = fmt.Println("backup-cli is a tool to backup files to a remote server. (1.2)")
 		_, _ = fmt.Println("")
 		_, _ = fmt.Println("--------------------")
 		_, _ = fmt.Println("")

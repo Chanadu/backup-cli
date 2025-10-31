@@ -77,7 +77,7 @@ func createBackupFiles(args []string, isDebug bool) {
 func scpBackupFiles(args []string, isDebug bool) {
 	for i := 2; i < len(args); i++ {
 		scpCmdText := fmt.Sprintf(
-			"sshpass -p %s rsync %s-Backup.7z %s:/mnt/backups/%s-Backup.7z",
+			"sshpass -p %s rsync %s-Backup.7z %s:/mnt/backups/%s-Backup.7z -rP",
 			args[1],
 			modifyFileName(args[i]),
 			args[0],

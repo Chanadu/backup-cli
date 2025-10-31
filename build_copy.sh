@@ -1,4 +1,4 @@
 #!/bin/bash
 
 ./build.sh
-cp ./bin/*i ~/Folders/CustomPrograms/
+cp ./bin/*i ~/folders/customPrograms/
