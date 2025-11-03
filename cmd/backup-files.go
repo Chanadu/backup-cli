@@ -39,6 +39,30 @@ func BackupFiles(cmd *cobra.Command, args []string) {
 	}
 	isDebug := debugFlag || verboseFlag
 
+	individualFlag, err := cmd.Flags().GetBool("individual")
+	if err != nil {
+		printErrorf("Error getting individual flag %s\n", err)
+		os.Exit(1)
+	}
+
+	if individualFlag {
+		for i := 2; i < len(args); i++ {
+			newArgs := []string{args[0], args[1], args[i]}
+
+			createBackupFiles(newArgs, isDebug)
+			fmt.Printf("\n---------------------------------------\n\n")
+			deleteServerBackupFiles(newArgs, isDebug)
+			fmt.Printf("\n---------------------------------------\n\n")
+			scpBackupFiles(newArgs, isDebug)
+			fmt.Printf("\n---------------------------------------\n\n")
+			deleteLocalBackupFiles(newArgs, isDebug)
+			fmt.Printf("\n---------------------------------------\n\n")
+			fmt.Printf("Backup(%s) completed successfully.", args[i])
+		}
+
+		return
+	}
+
 	createBackupFiles(args, isDebug)
 	fmt.Printf("\n---------------------------------------\n\n")
 	deleteServerBackupFiles(args, isDebug)

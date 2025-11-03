@@ -60,5 +60,6 @@ func init() {
 	}
 
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose mode(includes messages of ran commands)")
+	rootCmd.PersistentFlags().BoolP("individual", "i", false, "creates and moves each backup individually instead of together")
 	// cobra.OnInitialize(InitConfig)
 }
